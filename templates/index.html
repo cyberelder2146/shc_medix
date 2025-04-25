@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SHC Medix: Your health, made easy. Connect with doctors anytime, anywhere.">
+  <meta name="keywords" content="healthcare, telemedicine, doctor consultations, patient management">
+  <meta name="author" content="SHC Medix">
+  <title>SHC Medix</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-blue-700 shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="text-white text-2xl font-bold">
+        SHC Medix
+      </div>
+      <div class="space-x-6 text-white">
+        <a href="#home" class="hover:text-gray-300 transition duration-300">Home</a>
+        <a href="#features" class="hover:text-gray-300 transition duration-300">Features</a>
+        <a href="#contact" class="hover:text-gray-300 transition duration-300">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header Section -->
+  <header class="bg-blue-600 text-white p-6 text-center" id="home">
+    <h1 class="text-4xl font-bold">Welcome to SHC Medix</h1>
+    <p class="text-xl mt-2">Your health, made easy. Connect with Doctors anytime.</p>
+  </header>
+
+  <!-- Main Content Section -->
+  <main class="p-8 text-center">
+    <h2 class="text-2xl mb-4">Start managing your health today!!!</h2>
+
+    <!-- Choose Role Section -->
+    <section class="mt-10">
+      <h2 class="text-xl font-semibold mb-4">Continue As</h2>
+      <div class="flex justify-center space-x-6">
+        <a href="{{ url_for('login', role='patient') }}" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition mr-4">
+            Patient
+          </a>
+          <a href="{{ url_for('login', role='doctor') }}" class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">
+            Doctor
+          </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Features Section -->
+  <section class="bg-white py-10 px-6" id="features">
+    <h2 class="text-2xl font-bold text-center mb-6 text-blue-700">App Features</h2>
+    <div class="max-w-4xl mx-auto grid gap-6 md:grid-cols-2">
+      <div class="bg-blue-50 p-4 rounded-md shadow">
+        <h3 class="text-xl font-semibold mb-2 text-blue-600">Messaging & Remote Consultations</h3>
+        <p>Enables patients to quickly communicate with doctors, reducing wait times and travel burdens.</p>
+      </div>
+      <div class="bg-blue-50 p-4 rounded-md shadow">
+        <h3 class="text-xl font-semibold mb-2 text-blue-600">Streamlined Healthcare Management</h3>
+        <p>Includes appointment booking, symptom inquiry, and secure messaging in one place.</p>
+      </div>
+      <div class="bg-blue-50 p-4 rounded-md shadow">
+        <h3 class="text-xl font-semibold mb-2 text-blue-600">Empowered Patients</h3>
+        <p>Easy access to health info and direct communication encourages proactive care and better adherence.</p>
+      </div>
+      <div class="bg-blue-50 p-4 rounded-md shadow">
+        <h3 class="text-xl font-semibold mb-2 text-blue-600">Provider Support</h3>
+        <p>Helps doctors manage patient interactions and gather insights for public health strategies.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer Section -->
+  <footer class="bg-gray-200 py-4 text-center text-sm mt-10" id="contact">
+    <div class="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-6">
+      <span>Email: support@shcmedix.com</span>
+      <span>Phone: +234 800 123 4567</span>
+      <span>Customer Care: 24/7 Available</span>
+    </div>
+    <p class="mt-2">&copy; 2025 SHC Medix. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>

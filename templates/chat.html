@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat - SHC Medix</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-blue-700 shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="text-white text-2xl font-bold">
+        SHC Medix
+      </div>
+      <div class="space-x-6 text-white">
+        <a href="{{ url_for('patient_dashboard') }}" class="hover:text-gray-300 transition duration-300">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="hover:text-gray-300 transition duration-300">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="p-8 max-w-3xl mx-auto">
+    <h2 class="text-2xl font-bold mb-6 text-center">
+      Chat with {{ other_user.name }}
+    </h2>
+
+    <!-- Chat Box -->
+    <div class="bg-white p-4 rounded-lg shadow-md mb-4 h-96 overflow-y-auto" id="chat-messages">
+      {% if messages|length == 0 %}
+        <p class="text-center text-gray-500">No messages yet. Start the conversation!</p>
+      {% endif %}
+
+      {% for message in messages %}
+      <div class="mb-4 {% if message.sender_id == session['user_id'] %}text-right{% endif %}">
+        <p class="inline-block p-2 rounded-lg max-w-[75%] break-words
+          {% if message.sender_id == session['user_id'] %}
+            bg-blue-500 text-white
+          {% else %}
+            bg-gray-200 text-gray-800
+          {% endif %}">
+          {{ message.message }}
+        </p>
+        <small class="block text-gray-500">
+          {{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}
+        </small>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Chat Input -->
+    <form 
+      action="{{ url_for(chat_endpoint, doctor_id=other_user.id) if user.role == 'patient' else url_for(chat_endpoint, patient_id=other_user.id) }}" 
+      method="POST" 
+      onsubmit="return validateMessage()">
+      <div class="flex">
+        <input type="text" name="message" id="messageInput" class="flex-grow p-2 border rounded-l-md focus:ring focus:ring-blue-300" placeholder="Type a message..." required>
+        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-r-md hover:bg-blue-700 transition">
+          Send
+        </button>
+      </div>
+    </form>
+
+  </main>
+
+  <script>
+    // Scroll to bottom
+    const chatBox = document.getElementById('chat-messages');
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Prevent submitting empty or whitespace-only messages
+    function validateMessage() {
+      const input = document.getElementById('messageInput');
+      return input.value.trim().length > 0;
+    }
+  </script>  
+
+</body>
+</html>

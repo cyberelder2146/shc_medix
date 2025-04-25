@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Dashboard - SHC Medix</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-blue-700 shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="text-white text-2xl font-bold">
+        SHC Medix
+      </div>
+      <div class="space-x-6 text-white">
+        <a href="{{ url_for('patient_dashboard') }}" class="hover:text-gray-300 transition duration-300">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="hover:text-gray-300 transition duration-300">Logout</a>
+        <!-- <a href="/patient_chat/1" class="text-white">Messages</a>
+        <div id="notif-badge" class="relative">
+          <span id="notif-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full hidden"></span>
+        </div>     -->
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="p-8">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-6">
+            {% for category, message in messages %}
+              <div class="p-4 mb-4 rounded-md 
+                {% if category == 'error' %}bg-red-100 text-red-700
+                {% elif category == 'success' %}bg-green-100 text-green-700
+                {% else %}bg-blue-100 text-blue-700{% endif %}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}  
+    <p class="text-lg mb-6">Hello, {{ user.name }}</p>
+
+    <!-- Schedule Appointment -->
+    <section class="mb-12">
+      <h3 class="text-xl font-semibold mb-4">Schedule an Appointment</h3>
+      <form action="{{ url_for('schedule_appointment') }}" method="POST" class="space-y-4">
+        <div>
+          <label for="doctor_id" class="block text-gray-600">Select Doctor</label>
+          <select name="doctor_id" id="doctor_id" class="block w-full p-2 rounded-md border">
+            {% for doctor in doctors %}
+            <option value="{{ doctor.id }}">{{ doctor.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label for="date_time" class="block text-gray-600">Select Date & Time</label>
+          <input type="datetime-local" id="date_time" name="date_time" class="mt-1 p-2 w-full border rounded-md focus:ring focus:ring-blue-300" min="{{ current_time }}" required>
+        </div>
+
+        <div>
+          <button type="submit" class="w-full bg-blue-500 text-white px-6 py-2 rounded-full transition">Schedule Appointment</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Your Appointments -->
+    <section class="mb-12">
+      <h3 class="text-xl font-semibold mb-4">Your Appointments</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {% for appointment in appointments %}
+        <div class="bg-white p-3 rounded-lg shadow-md">
+          <h4 class="text-lg font-semibold mb-2">Appointment with {{ appointment.doctor_name }}</h4>
+          <p class="text-gray-600">Date & Time: {{ appointment.date_time }}</p>
+          <p class="text-red-600">Status: {{ appointment.status }}</p>
+          <a href="{{ url_for('patient_chat', doctor_id=appointment.doctor_id) }}" 
+            class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-center transition">
+              Chat with Doctor
+          </a>
+        </div>
+        {% else %}
+        <p class="text-gray-600">No appointments scheduled yet.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+  <script>
+    function updateNotificationCount() {
+      fetch('/get_unread_count')
+        .then(res => res.json())
+        .then(data => {
+          const badge = document.getElementById('notif-count');
+          if (data.unread_count > 0) {
+            badge.textContent = data.unread_count;
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        });
+    }
+    
+    setInterval(updateNotificationCount, 10000);  // poll every 10 sec
+    window.onload = updateNotificationCount;
+    </script>    
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recent Chats - SHC Medix</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-blue-700 shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="text-white text-2xl font-bold">
+        SHC Medix
+      </div>
+      <div class="space-x-6 text-white relative">
+        <a href="{{ url_for('doctor_dashboard') }}" class="hover:text-gray-300 transition duration-300">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="hover:text-gray-300 transition duration-300">Logout</a>
+        <a href="{{ url_for('recent_chats') }}" class="relative text-white hover:text-gray-300">
+          Messages
+          </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="p-8 max-w-7xl mx-auto">
+    <p class="text-lg mb-6">Welcome, Dr. {{ user.name }}</p>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-4 text-purple-700 border-b pb-2">Chats</h2>
+      {% if chats %}
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Message</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {% for chat in chats %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="font-medium">{{ chat.other_user_name }}</div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-500 truncate max-w-xs">{{ chat.message }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-500">{{ chat.timestamp.strftime('%H:%M %d/%m') }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <a href="{{ url_for('doctor_chat', patient_id=chat.receiver_id if chat.sender_id == user.id else chat.sender_id) }}" 
+                   class="text-blue-600 hover:text-blue-900">Continue Chat</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <p class="text-gray-500">No recent chats.</p>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <script>
+    function updateNotificationCount() {
+      fetch('/get_unread_count')
+        .then(res => res.json())
+        .then(data => {
+          const badge = document.querySelector('a[href="{{ url_for("recent_chats") }}"] span');
+          if (badge && data.unread_count > 0) {
+            badge.textContent = data.unread_count;
+            badge.classList.remove('hidden');
+          } else if (badge) {
+            badge.classList.add('hidden');
+          }
+        });
+    }
+
+    setInterval(updateNotificationCount, 10000);  // every 10s
+    window.onload = updateNotificationCount;
+  </script>
+</body>
+</html>

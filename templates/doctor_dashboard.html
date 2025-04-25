@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Dashboard - SHC Medix</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function setConfirmAppointment(appointmentId) {
+      const confirmLink = document.getElementById('confirmLink');
+      confirmLink.href = `/confirm_appointment/${appointmentId}`;
+      document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    function setRejectAppointment(appointmentId) {
+      const rejectLink = document.getElementById('rejectLink');
+      rejectLink.href = `/reject_appointment/${appointmentId}`;
+      document.getElementById('rejectModal').classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+  </script>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-blue-700 shadow-md">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="text-white text-2xl font-bold">SHC Medix</div>
+      <div class="space-x-6 text-white">
+        <a href="{{ url_for('doctor_dashboard') }}" class="hover:text-gray-300 transition duration-300">Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="hover:text-gray-300 transition duration-300">Logout</a>
+        <a href="{{ url_for('recent_chats') }}" class="text-white">Messages</a>
+        <div id="notif-badge" class="relative">
+          <span id="notif-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full"></span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="p-8">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="mb-6">
+          {% for category, message in messages %}
+            <div class="p-4 mb-4 rounded-md 
+              {% if category == 'error' %}bg-red-100 text-red-700
+              {% elif category == 'success' %}bg-green-100 text-green-700
+              {% else %}bg-blue-100 text-blue-700{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <p class="text-lg mb-6">Welcome, Dr. {{ user.name }}</p>
+
+    <!-- Pending Appointments -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4 text-blue-700 border-b pb-2">Pending Appointments</h2>
+      {% if pending_appointments %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for appointment in pending_appointments %}
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold">{{ appointment.patient_name }}</h3>
+            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
+              {{ appointment.status }}
+            </span>
+          </div>
+          <div class="space-y-2 mb-4">
+            <p class="text-gray-600"><span class="font-medium">Date:</span> {{ appointment.date_time.split(' ')[0] }}</p>
+            <p class="text-gray-600"><span class="font-medium">Time:</span> {{ appointment.date_time.split(' ')[1] }}</p>
+          </div>
+          <div class="flex flex-col space-y-2">
+            <button onclick="setConfirmAppointment({{ appointment.id }})"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition">
+              Confirm Appointment
+            </button>
+            <button onclick="setRejectAppointment({{ appointment.id }})"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition">
+              Reject Appointment
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <p class="text-gray-500">No pending appointments at this time.</p>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Confirmed Appointments -->
+    <section class="mb-12">
+      <h2 class="text-2xl font-semibold mb-4 text-green-700 border-b pb-2">Confirmed Appointments</h2>
+      {% if confirmed_appointments %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for appointment in confirmed_appointments %}
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold">{{ appointment.patient_name }}</h3>
+            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+              {{ appointment.status }}
+            </span>
+          </div>
+          <div class="space-y-2 mb-4">
+            <p class="text-gray-600"><span class="font-medium">Date:</span> {{ appointment.date_time.split(' ')[0] }}</p>
+            <p class="text-gray-600"><span class="font-medium">Time:</span> {{ appointment.date_time.split(' ')[1] }}</p>
+          </div>
+          <a href="{{ url_for('doctor_chat', patient_id=appointment.patient_id) }}"
+             class="block w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-center transition">
+            Chat with Patient
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="bg-white p-6 rounded-lg shadow-md text-center">
+        <p class="text-gray-500">No confirmed appointments at this time.</p>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <!-- Confirm Modal -->
+  <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-md">
+      <h3 class="text-lg font-semibold mb-4 text-green-600">Confirm Appointment</h3>
+      <p class="mb-6 text-gray-700">Are you sure you want to confirm this appointment?</p>
+      <div class="flex justify-end gap-4">
+        <button onclick="closeModal('confirmModal')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Cancel</button>
+        <a id="confirmLink" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Yes, Confirm</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-11/12 max-w-md">
+      <h3 class="text-lg font-semibold mb-4 text-red-600">Reject Appointment</h3>
+      <p class="mb-6 text-gray-700">Are you sure you want to reject this appointment?</p>
+      <div class="flex justify-end gap-4">
+        <button onclick="closeModal('rejectModal')" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Cancel</button>
+        <a id="rejectLink" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Yes, Reject</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateNotificationCount() {
+      fetch('/get_unread_count')
+        .then(res => res.json())
+        .then(data => {
+          const badge = document.getElementById('notif-count');
+          if (data.unread_count > 0) {
+            badge.textContent = data.unread_count;
+            badge.classList.remove('hidden');
+          } else {
+            badge.classList.add('hidden');
+          }
+        });
+    }
+
+    setInterval(updateNotificationCount, 10000);
+    window.onload = updateNotificationCount;
+  </script>
+
+</body>
+</html>
